@@ -14,13 +14,30 @@
 #
 # Есть два назначения для скрипта
 # 1) init_json_diff.py <первый файл.JSON> <второй файл.json> -- разобрать JSON на структуру из папок и файлов (поля JSON)
-# 2) make_json.py <1 или 2> -- нахожусь в папке с проектом и собираю файл JSON (после исправлений) - новый файл JSON будет создан в папке NEW/<1 или 2>/
+# 2) make_json.py <1 или 2> -- собрать новый исправленный JSON первой или второй версии
 #
 #------------------------------------------------------------------------------------
 
 
 import sys
 import json
+
+def print_json(json_object):
+    if type(json_object) == dict:
+        print('словарь')
+        for key, val in json_object.items():
+            print(f'key == {key}')
+            if type(val) in (list, dict):
+                print_json(val)
+            else:
+                print(f'"{val}"')
+    else:
+        print('список')
+        for val in json_object:
+            if type(val) in (list, dict):
+                print_json(val)
+            else:
+                print(f'"{val}"')
 
 # Получаю аргументы скрипта
 args = sys.argv[1:]
@@ -30,10 +47,14 @@ if len(args) != 2:
 one, two = args
 
 try:
-    with open() as file:
-        data = json.load(file)                # передаем файловый объект
-        for key, value in data.items():
-            if type(value) == list:
-                print(f'{key}: {", ".join(value)}')
-            else:
-                print(f'{key}: {value}')
+    # Открываю два сравниваемых файла JSON
+    with open(one) as first_file, open(two) as second_file:
+        # Получаю JSON в формате python
+        one = json.load(first_file)
+        two = json.load(second_file)
+except Exception as err:
+    sys.exit(f"Неверные типы переданных файлов:\n{err}")
+
+
+print_json(one)
+
