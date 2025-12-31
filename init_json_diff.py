@@ -21,10 +21,13 @@
 
 import sys
 import json
+from itertools import count
+
 
 def print_json(json_object):
+    numbers = count(1)
     if type(json_object) == dict:
-        print('словарь')
+        print(f'словарь-{next(numbers)}')
         for key, val in json_object.items():
             print(f'key == {key}')
             if type(val) in (list, dict):
@@ -32,7 +35,7 @@ def print_json(json_object):
             else:
                 print(f'"{val}"')
     else:
-        print('список')
+        print(f'список-{next(numbers)}')
         for val in json_object:
             if type(val) in (list, dict):
                 print_json(val)
