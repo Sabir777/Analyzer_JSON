@@ -23,6 +23,7 @@ import sys
 import json
 import os
 from pathlib import Path
+from datetime import datetime
 
 
 def print_json(json_object, name_json, old_pwd):
@@ -68,11 +69,11 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     if len(args) != 2:
         sys.exit("В команду нужно передать два аргумента!!!\nАварийное завершение программы")
-    one, two = args
+    first_name, second_name = args
 
     try:
         # Открываю два сравниваемых файла JSON
-        with open(one) as first_file, open(two) as second_file:
+        with open(first_name) as first_file, open(second_name) as second_file:
             # Получаю JSON в формате python
             one = json.load(first_file)
             two = json.load(second_file)
@@ -80,6 +81,18 @@ if __name__ == '__main__':
         sys.exit(f"Неверные типы переданных файлов:\n{err}")
 
 
+    
+    # Удаляю суффикс .json из имени
+    first_name = first_name.removesuffix(".json")
+    second_name = second_name.removesuffix(".json")
+    # Создаю папку с проектом (уникальность по именам и дате-времени создания)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M")
+    new_dir = f'diff_{first_name}__{second_name}_{timestamp}'
+    os.makedirs(new_dir, exist_ok=True) # Создаю папку
+    os.chdir(new_dir) # Перехожу в новую папку
     pwd = Path.cwd() # Текущая директория скрипта
-    print_json(one, 1, pwd) # Передаю в функцию объект JSON, номер JSON и текущую директорию
+
+    # Передаю в функцию объект JSON, номер JSON и текущую директорию
+    print_json(one, 1, pwd)
+    print_json(two, 2, pwd)
 
