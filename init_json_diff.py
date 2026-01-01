@@ -39,17 +39,22 @@ def print_json(json_object, name_json, old_pwd):
 
     # Каждый объект JSON - это итерируемый объект
     # Если его элемент - это вложенный объект, то он обрабатывается рекурсивно
-    for index, val in enumerate(json_object):
-        if type(val) in (list, dict):
-            if type(json_object) == list:
+    if type(json_object) == list:
+        for index, val in enumerate(json_object):
+            if type(val) in (list, dict):
                 new_dir = pwd / f'__{index}'
-            else: # если json_object это dict, то каждый элемент сохраняю в папке с именем ключа
-                new_dir = pwd / f'{val}'
+                os.makedirs(new_dir, exist_ok=True) # Создаю номерную папку для списка
+                os.chdir(new_dir) # Перехожу в новую папку
+                print_json(val, name_json, pwd)
 
-            # Создаю номерную папку (для списка) или папку с именем ключа (для словаря) 
-            os.makedirs(new_dir, exist_ok=True)
-            os.chdir(new_dir) # Перехожу в новую папку
-            print_json(val, name_json, pwd)
+    else: # если json_object это dict, то каждый элемент сохраняю в папке с именем ключа
+        for key, val in json_object.items():
+            if type(val) in (list, dict):
+                new_dir = pwd / f'{key}'
+                os.makedirs(new_dir, exist_ok=True) # Создаю папку с именем ключа
+                os.chdir(new_dir) # Перехожу в новую папку
+                print_json(val, name_json, pwd)
+
 
     # После обработки вложенных объктов возвращаюсь в родительскую директорию (Произвольная вложенность)
     # Ничего не делаю, если это стартовая директория скрипта
