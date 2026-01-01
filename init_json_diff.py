@@ -51,24 +51,23 @@ def print_json(json_object, n_json, old_pwd):
     в соответствии со структурой JSON-файла. Для каждого
     вложенного объекта будет создаваться отдельная папка"""
 
-    # Каждый объект JSON - это итерируемый объект
-    # Если его элемент - это вложенный объект, то он обрабатывается рекурсивно
+    # Определяю текущую директорию
+    pwd = Path.cwd()
 
     # Создаю файл JSON в текущей директории для данного объекта
 
-    # Определяю текущую директорию
-
+    # Каждый объект JSON - это итерируемый объект
+    # Если его элемент - это вложенный объект, то он обрабатывается рекурсивно
     for index, val in enumerate(json_object):
         if type(val) in (list, dict):
         match val:
             case list():
-                old_pwd = Path.cwd()
-                new_dir = old_pwd / f'__{index}'
+                new_dir = pwd / f'__{index}'
                 os.makedirs(new_dir, exist_ok=True) # Создаю папку для списка
                 os.chdir(new_dir) # Перехожу в новую папку
-                print_json(val, n_json, old_pwd)
+                print_json(val, n_json, pwd)
 
-    if old_pwd != Path.cwd():
+    if old_pwd != pwd:
         os.chdir('..') # Возвращаюсь в родительскую директорию
 
 
@@ -109,6 +108,6 @@ if __name__ == '__main__':
         sys.exit(f"Неверные типы переданных файлов:\n{err}")
 
 
-    _pwd = Path.cwd() # Текущая директория скрипта
+    pwd = Path.cwd() # Текущая директория скрипта
     print_json(one, 1, _pwd) # Передаю в функцию номер JSON и текущую директорию
 
