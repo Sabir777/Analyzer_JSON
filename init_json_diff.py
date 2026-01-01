@@ -23,30 +23,9 @@ import sys
 import json
 import os
 from pathlib import Path
-# from itertools import count
 
 
-# def print_json(json_object):
-    # numbers = count(1)
-    # if type(json_object) == dict:
-        # print(f'словарь-{next(numbers)}')
-        # for key, val in json_object.items():
-            # print(f'key == {key}')
-            # if type(val) in (list, dict):
-                # print_json(val)
-            # else:
-                # print(f'"{val}"')
-    # else:
-        # print(f'список-{next(numbers)}')
-        # for val in json_object:
-            # if type(val) in (list, dict):
-                # print_json(val)
-            # else:
-                # print(f'"{val}"')
-
-
-
-def print_json(json_object, n_json, old_pwd):
+def print_json(json_object, name_json, old_pwd):
     """Функция для создания структуры из файлов и папок
     в соответствии со структурой JSON-файла. Для каждого
     вложенного объекта будет создаваться отдельная папка"""
@@ -55,39 +34,27 @@ def print_json(json_object, n_json, old_pwd):
     pwd = Path.cwd()
 
     # Создаю файл JSON в текущей директории для данного объекта
+    with open(f'{name_json}.json', 'w') as file:
+        json.dump(json_object, file, indent=2)
 
     # Каждый объект JSON - это итерируемый объект
     # Если его элемент - это вложенный объект, то он обрабатывается рекурсивно
     for index, val in enumerate(json_object):
         if type(val) in (list, dict):
-        match val:
-            case list():
+            if type(json_object) == list:
                 new_dir = pwd / f'__{index}'
-                os.makedirs(new_dir, exist_ok=True) # Создаю папку для списка
-                os.chdir(new_dir) # Перехожу в новую папку
-                print_json(val, n_json, pwd)
+            else: # если json_object это dict, то каждый элемент сохраняю в папке с именем ключа
+                new_dir = pwd / f'{val}'
 
+            # Создаю номерную папку (для списка) или папку с именем ключа (для словаря) 
+            os.makedirs(new_dir, exist_ok=True)
+            os.chdir(new_dir) # Перехожу в новую папку
+            print_json(val, name_json, pwd)
+
+    # После обработки вложенных объктов возвращаюсь в родительскую директорию (Произвольная вложенность)
+    # Ничего не делаю, если это стартовая директория скрипта
     if old_pwd != pwd:
-        os.chdir('..') # Возвращаюсь в родительскую директорию
-
-
-
-
-    if type(json_object) == dict:
-        print(f'словарь-{next(numbers)}')
-        for key, val in json_object.items():
-            print(f'key == {key}')
-            if type(val) in (list, dict):
-                print_json(val)
-            else:
-                print(f'"{val}"')
-    else:
-        print(f'список-{next(numbers)}')
-        for val in json_object:
-            if type(val) in (list, dict):
-                print_json(val)
-            else:
-                print(f'"{val}"')
+        os.chdir('..')
 
 
 
@@ -109,5 +76,5 @@ if __name__ == '__main__':
 
 
     pwd = Path.cwd() # Текущая директория скрипта
-    print_json(one, 1, _pwd) # Передаю в функцию номер JSON и текущую директорию
+    print_json(one, 1, pwd) # Передаю в функцию объект JSON, номер JSON и текущую директорию
 
