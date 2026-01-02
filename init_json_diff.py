@@ -105,23 +105,22 @@ if __name__ == '__main__':
         
         # Проверяю наличие 1.json и 2.json
         if '1.json' in files or '2.json' in files:
+            # Если одного из файлов не существует, то сравнивать с пустым файлом
             f_file = lambda name: str(current_dir / name) if name in files else '/dev/null'
-
-            if '1.json' in files a
-            file1 = current_dir / '1.json'
-            file2 = current_dir / '2.json'
+            file1 = f_file('1.json')
+            file2 = f_file('2.json')
             diff_file = current_dir / 'diff.txt'
             
             try:
                 result = subprocess.run(
-                    ['diff', '-u', str(file1), str(file2)],
+                    ['diff', '-u', file1, file2],
                     capture_output=True,
                     text=True,
                     check=False  # Не выбрасывать исключение при различии файлов
                 )
                 
 
-                # Сохраняю различия в файл diff.txt если вывод не пустой
+                # Сохраняю различия в файл diff.txt если вывод НЕ пустой
                 if result.stdout:
                     diff_file.write_text(result.stdout)
                 
