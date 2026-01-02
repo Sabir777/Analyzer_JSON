@@ -104,7 +104,10 @@ if __name__ == '__main__':
         current_dir = Path(dirpath)
         
         # Проверяю наличие 1.json и 2.json
-        if '1.json' in files and '2.json' in files:
+        if '1.json' in files or '2.json' in files:
+            f_file = lambda name: str(current_dir / name) if name in files else '/dev/null'
+
+            if '1.json' in files a
             file1 = current_dir / '1.json'
             file2 = current_dir / '2.json'
             diff_file = current_dir / 'diff.txt'
