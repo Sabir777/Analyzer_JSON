@@ -100,10 +100,27 @@ if __name__ == '__main__':
 
 
     # Сравниваю diff -u 1.json 2.json во всех папках включая вложенные
-    for dirpath, _, filenames in os.walk(pwd):
+    for dirpath, _, files in os.walk(pwd):
         current_dir = Path(dirpath)
         
-        # Проверяем наличие 1.json и 2.json
-        if '1.json' in filenames and '2.json' in filenames:
-            print(f"Найдена пара в: {current_dir}")
-            # Создаем diff...
+        # Проверяю наличие 1.json и 2.json
+        if '1.json' in files and '2.json' in files:
+            file1 = current_dir / '1.json'
+            file2 = current_dir / '2.json'
+            diff_file = current_dir / 'diff.txt'
+            
+            try:
+                result = subprocess.run(
+                    ['diff', '-u', str(file1), str(file2)],
+                    capture_output=True,
+                    text=True,
+                    check=False  # Не выбрасывать исключение при различии файлов
+                )
+                
+
+                # Сохраняю различия в файл diff.txt если вывод не пустой
+                if result.stdout:
+                    diff_file.write_text(result.stdout)
+                
+            except Exception as e:
+                print(f"  ✗ Ошибка: {e}")
