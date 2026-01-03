@@ -8,8 +8,8 @@
 #====================================================================================
 # Назначение: Скрипт для сборки JSON.
 # Автор: Hypnodancer
-# Дата создания: 02-01-2026
-# Версия: 1.3
+# Дата создания: 03-01-2026
+# Версия: 2.1
 #====================================================================================
 
 #------------------------------------------------------------------------------------
@@ -40,7 +40,9 @@ def is_diff():
 
 
 def make_json(number, old_pwd):
-    """Получаю новый python-объект после внесенных в проект изменений"""
+    """Получаю новый python-объект после внесенных в проект изменений.
+    После поиска изменений и возвращения результата он будет преобразован
+    в JSON-объект и сохранен в новой папке"""
 
     # Текущая директория
     pwd = Path.cwd()
@@ -57,8 +59,8 @@ def make_json(number, old_pwd):
     if is_diff():
         return obj_python
 
+    change = False  # изменения пока что не найдены
     if type(obj_python) == list:
-        change = False  # изменения пока что не найдены
         for i in range(len(obj_python)):
             nesting_dir = pwd / f'__{i}'
             if nesting_dir.is_dir():     # проверить существует ли вложенная папка
@@ -67,21 +69,25 @@ def make_json(number, old_pwd):
                 if result is not None:
                     change = True
                     obj_python[i] = result
-        if change:
-            return obj_python
-        else:
-            return None
+    else:   # если объект словарь
+        for key in obj_python:
+            nesting_dir = pwd / f'{key}'
+            if nesting_dir.is_dir():     # проверить существует ли вложенная папка
+                os.chdir(nesting_dir)    # перехожу во вложенную папку
+                result = make_json(number, pwd)
+                if result is not None:
+                    change = True
+                    obj_python[i] = result
+    if change:
+        return obj_python
+    else:
+        return None
 
 
-
-
-
-
-
-
-
-
-
+    # После обработки вложенных объектов возвращаюсь в родительскую директорию (Произвольная вложенность)
+    # Ничего не делаю, если это стартовая директория скрипта
+    if old_pwd != pwd:
+        os.chdir('..')
 
 
 
