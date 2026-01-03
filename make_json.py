@@ -58,13 +58,19 @@ def make_json(number, old_pwd):
         return obj_python
 
     if type(obj_python) == list:
+        change = False  # изменения пока что не найдены
         for i in range(len(obj_python)):
             nesting_dir = pwd / f'__{i}'
             if nesting_dir.is_dir():     # проверить существует ли вложенная папка
                 os.chdir(nesting_dir)    # перехожу во вложенную папку
-                obj_python[i] = make_json(number, pwd)
-                if obj_python[i] is None: # Если я получил None - значит изменений не БЫЛО ???? (Как это сделать!!!)
-                    return None
+                result = make_json(number, pwd)
+                if result is not None:
+                    change = True
+                    obj_python[i] = result
+        if change:
+            return obj_python
+        else:
+            return None
 
 
 
