@@ -27,31 +27,45 @@
 
 
 import sys
-# import json
-# import os
+import json
+import os
 from pathlib import Path
 # from datetime import datetime
 # import subprocess
 
 
 
-def make_json():
-    """Функция для сборки нового JSON-файла после редактирования
-    отдельных полей"""
+def is_diff():
     pass
 
 
-def is_change (bool)
-Если diff изменился
+def make_json(number, old_pwd):
+    """Получаю новый python-объект после внесенных в проект изменений"""
 
+    # Текущая директория
+    pwd = Path.cwd()
 
+    try:
+        # Открываю нужную версию json-файла (1 или 2)
+        with open(f'{number}.json') as file:
+            # Получаю JSON в формате python
+            obj_python = json.load(file)
+    except Exception as err:
+        sys.exit(f"Не удалось преобразовать {pwd}/{number}.json в python-объект")
 
-def make_json(old_pwd):
+    # Если новый diff отличается от старого - возвращаю объект 
+    if is_diff():
+        return obj_python
 
-    if "__0" есть :
-        return []
-    elif "*key" есть:
-        return {if}
+    if type(obj_python) == list:
+        for i in range(len(obj_python)):
+            nesting_dir = pwd / f'__{i}'
+            if nesting_dir.is_dir():     # проверить существует ли вложенная папка
+                os.chdir(nesting_dir)    # перехожу во вложенную папку
+                obj_python[i] = make_json(number, pwd)
+                if obj_python[i] is None: # Если я получил None - значит изменений не БЫЛО ???? (Как это сделать!!!)
+                    return None
+
 
 
 
@@ -84,12 +98,18 @@ if __name__ == '__main__':
         sys.exit("Вы указали несуществующую папку для проекта!!!")
 
 
+
     # Перехожу в папку с проектом
+    pwd = Path.cwd() / dir_project
+    os.chdir(pwd)
+
+    # Получаю python-объект для нового JSON
+    obj_json = make_json(name_json, pwd)
+
+    if obj_json is None:
+        sys.exit("Проект не был изменен. Выгружать ничего не нужно!!!")
+
     
-    # узнаю тип JSOn - dict или list
-
-    Создаю словарь или список 
-
-функция возвращает словарь или список
-- Получает путь (текщую директорию)
-{генератор словаря} или [генератор списка]  -- наверху генератор-функция
+# функция возвращает словарь или список
+# - Получает путь (текщую директорию)
+# {генератор словаря} или [генератор списка]  -- наверху генератор-функция
