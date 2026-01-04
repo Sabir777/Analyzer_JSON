@@ -57,7 +57,7 @@ def make_json(number, old_pwd):
                 obj_python = json.load(file)
         except Exception as err:
             sys.exit(f"Не удалось преобразовать {pwd}/{number}.json в python-объект")
-    else: # Если файл не существует создаю пустой объект
+    else: # Если файл не существует создаю пустой объект по типу существующего файла
         other = "2.json" if number == '1' else "1.json"
         try:
             with open(pwd / other) as file:
