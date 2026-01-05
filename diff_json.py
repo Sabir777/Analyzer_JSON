@@ -65,6 +65,11 @@ from datetime import datetime
 import subprocess
 
 
+
+class DiffError(Exception):
+    pass
+
+
 def print_json(json_object, name_json, old_pwd):
     """Функция для создания структуры из файлов и папок
     в соответствии со структурой JSON-файла. Для каждого
@@ -158,11 +163,15 @@ if __name__ == '__main__':
                     text=True,
                     check=False  # Не выбрасывать исключение при различии файлов
                 )
-                
 
-                # Сохраняю различия в файл diff.txt если вывод НЕ пустой
-                if result.stdout:
+                # returncode: 0=идентичны, 1=различаются, 2=ошибка
+                res = result.returncode
+                if res == 2:
+                    raise DiffError(f"Ошибка diff: {result.stderr.strip()}")
+                # Сохраняю различия в файл diff.txt если файлы различаются
+                if res == 1:
                     diff_file.write_text(result.stdout)
                 
+
             except Exception as e:
                 print(f"  ✗ Ошибка: {e}")

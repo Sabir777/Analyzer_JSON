@@ -23,20 +23,49 @@
 #------------------------------------------------------------------------------------
 
 
-# diff -u <(diff -u 1.json 2.json | sed 1,2d) <(sed 1,2d diff.txt)
-
 
 import sys
 import json
 import os
 from pathlib import Path
 # from datetime import datetime
-# import subprocess
+import subprocess
 
 
 
-def is_diff():
+class DiffError(Exception):
     pass
+
+
+def is_diff(number):
+    """Функция для проверки наличия изменений в json-файлах проекта"""
+
+    pwd = Path.cwd() # Текущая директория
+    name1 = pwd / f"{number}.json"  # файл для сборки
+    name2 = pwd / f".{number}.json" # теневая копия
+
+    if name1.is_file() or name2.is_file():
+        # Сравнивать с пустым файлом если одного из файлов не существует
+        func_name = lambda value: str(value) if value.is_file() else '/dev/null'
+        file1 = func_name(name1)
+        file2 = func_name(name2)
+        result = subprocess.run(
+            ['diff', '-u', file1, file2],
+            capture_output=True,
+            text=True,
+            check=False  # Не выбрасывать исключение при различии файлов
+        )
+
+        # returncode: 0=идентичны, 1=различаются, 2=ошибка
+        res = result.returncode
+        if res == 2:
+            raise DiffError(f"Ошибка diff: {result.stderr.strip()}")
+        elif res == 1:
+            return True
+
+    return False
+
+
 
 def make_json(number, old_pwd):
     """Получаю новый python-объект после внесенных в проект изменений.
