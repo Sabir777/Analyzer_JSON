@@ -49,8 +49,11 @@ def print_json(json_object, name_json, old_pwd):
     pwd = Path.cwd()
 
     # Создаю файл JSON в текущей директории для данного объекта
-    with open(f'{name_json}.json', 'w') as file:
-        json.dump(json_object, file, indent=2)
+    # Создаю теневые копии для всех создаваемых объектов
+    # Теневая копия позволит понять был ли изначально здесь объект JSON (при удалении значений)
+    with open(f'{name_json}.json', 'w') as file1, open(f'.{name_json}.json', 'w') as file2:
+        json.dump(json_object, file1, indent=2)
+        json.dump(json_object, file2, indent=2)
 
     # Каждый объект JSON - это итерируемый объект
     # Если его элемент - это вложенный объект, то он обрабатывается рекурсивно
