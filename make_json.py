@@ -38,68 +38,74 @@ from pathlib import Path
 def is_diff():
     pass
 
-
 def make_json(number, old_pwd):
     """Получаю новый python-объект после внесенных в проект изменений.
     После поиска изменений и возвращения результата он будет преобразован
     в JSON-объект и сохранен в новой папке"""
 
-    # Текущая директория
-    pwd = Path.cwd()
 
 
-    # Проверяю существование файла
-    file_dir = pwd / f'{number}.json'
-    if file_dir.is_file():  # Если файл существует
-        try:
-            with open(file_dir) as file:
-                # Получаю JSON в формате python
-                obj_python = json.load(file)
-        except Exception as err:
-            sys.exit(f"Не удалось преобразовать {pwd}/{number}.json в python-объект")
-    else: # Если файл не существует создаю пустой объект по типу существующего файла
-        other = "2.json" if number == '1' else "1.json"
-        try:
-            with open(pwd / other) as file:
-                # Получаю JSON в формате python
-                obj_other = json.load(file)
-                # Создаю пустой объект на основе другого файла
-                obj_python = [] if type(obj_other) == list else {}
-        except Exception as err:
-            sys.exit(f"Не удалось преобразовать {pwd}/{other} в python-объект")
+# def make_json(number, old_pwd):
+    # """Получаю новый python-объект после внесенных в проект изменений.
+    # После поиска изменений и возвращения результата он будет преобразован
+    # в JSON-объект и сохранен в новой папке"""
+
+    # # Текущая директория
+    # pwd = Path.cwd()
 
 
-    # Если новый diff отличается от старого - возвращаю объект 
-    if is_diff():
-        return obj_python
+    # # Проверяю существование файла
+    # file_dir = pwd / f'{number}.json'
+    # if file_dir.is_file():  # Если файл существует
+        # try:
+            # with open(file_dir) as file:
+                # # Получаю JSON в формате python
+                # obj_python = json.load(file)
+        # except Exception as err:
+            # sys.exit(f"Не удалось преобразовать {pwd}/{number}.json в python-объект")
+    # else: # Если файл не существует создаю пустой объект по типу существующего файла
+        # other = "2.json" if number == '1' else "1.json"
+        # try:
+            # with open(pwd / other) as file:
+                # # Получаю JSON в формате python
+                # obj_other = json.load(file)
+                # # Создаю пустой объект на основе другого файла
+                # obj_python = [] if type(obj_other) == list else {}
+        # except Exception as err:
+            # sys.exit(f"Не удалось преобразовать {pwd}/{other} в python-объект")
 
 
-    change = False  # изменения пока что не найдены
-    if type(obj_python) == list:
-        for i in range(len(obj_python)):
-            try:
-                nesting_dir = pwd / f'__{i}'
-                if nesting_dir.is_dir():     # проверить существует ли вложенная папка
-                    os.chdir(nesting_dir)    # перехожу во вложенную папку
-                    result = make_json(number, pwd)
-                    if result is not None:
-                        change = True
-                        obj_python[i] = result
-            except Exception as e:
-                sys.exit(f"Ошибка индекса для списка")
-    else:   # если объект словарь
-        for item in pwd.iterdir():
-            if item.is_dir(): # Перебираю все папки
-                os.chdir(nesting_dir) # перехожу во вложенную папку
-                result = make_json(number, pwd)
-                if result is not None:
-                    change = True
-                    obj_python[item.name] = result
+    # # Если новый diff отличается от старого - возвращаю объект 
+    # if is_diff():
+        # return obj_python
 
-    if change:
-        return obj_python
-    else:
-        return None
+
+    # change = False  # изменения пока что не найдены
+    # if type(obj_python) == list:
+        # for i in range(len(obj_python)):
+            # try:
+                # nesting_dir = pwd / f'__{i}'
+                # if nesting_dir.is_dir():     # проверить существует ли вложенная папка
+                    # os.chdir(nesting_dir)    # перехожу во вложенную папку
+                    # result = make_json(number, pwd)
+                    # if result is not None:
+                        # change = True
+                        # obj_python[i] = result
+            # except Exception as e:
+                # sys.exit(f"Ошибка индекса для списка")
+    # else:   # если объект словарь
+        # for item in pwd.iterdir():
+            # if item.is_dir(): # Перебираю все папки
+                # os.chdir(nesting_dir) # перехожу во вложенную папку
+                # result = make_json(number, pwd)
+                # if result is not None:
+                    # change = True
+                    # obj_python[item.name] = result
+
+    # if change:
+        # return obj_python
+    # else:
+        # return None
 
 
 
