@@ -110,13 +110,14 @@ def make_json(number, old_pwd):
             file_json = copy.deepcopy(other_json) if type(other_json) == list else {}
 
         for item in pwd.iterdir():
-            os.chdir(item) # Перехожу в дочернюю папку
-            value = make_json(number, pwd)
-            if value is not None:
-                change = True
-                # Удаляю префикс __ в названии папок для элементов списка
-                key = item.name.removeprefix("__")
-                file_json[key] = value
+            if item.is_dir(): # Если объект является папкой
+                os.chdir(item) # Перехожу в дочернюю папку
+                value = make_json(number, pwd)
+                if value is not None:
+                    change = True
+                    # Удаляю префикс __ в названии папок для элементов списка
+                    key = item.name.removeprefix("__")
+                    file_json[key] = value
 
         # После обработки вложенных объектов возвращаюсь в родительскую директорию (Произвольная вложенность)
         # Ничего не делаю, если это стартовая директория скрипта
