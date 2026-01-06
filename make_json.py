@@ -30,6 +30,7 @@ import os
 from pathlib import Path
 import subprocess
 import copy
+from re import sub
 # from datetime import datetime
 
 
@@ -162,4 +163,17 @@ if __name__ == '__main__':
         sys.exit("Проект не был изменен. Выгружать ничего не нужно!!!")
 
 
-    print(obj_json)
+    # Перехожу в директорию запуска скрипта
+    os.chdir('..')
+
+    # Создаю имя для папки в которой будет сохранен новый json
+    pattern = r"(diff)(_[_\w-]+_)(\d{12})"
+    # Уникальность по дате-времени создания
+    timestamp = datetime.now().strftime("%Y%m%d%H%M")
+    make_dir = Path.cwd() / sub(pattern, fr'make\2{timestamp}',dir_project)
+    os.makedirs(make_dir, exist_ok=True) # Создаю папку
+
+    # Записываю результат в файл
+    with open(make_dir / f"make_{name_json}.json", 'w') as file:
+        json.dump(obj_json, file, indent=2)
+
