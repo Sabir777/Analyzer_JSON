@@ -29,7 +29,6 @@ import json
 import os
 from pathlib import Path
 import subprocess
-import copy
 from re import sub
 from datetime import datetime
 
