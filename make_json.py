@@ -119,7 +119,7 @@ def make_json(number, old_pwd):
                     if type(file_json) == list:
                         file_json.append(value)
                     else:
-                        file_json[key] = value
+                        file_json[item.name] = value
 
         # После обработки вложенных объектов возвращаюсь в родительскую директорию (Произвольная вложенность)
         # Ничего не делаю, если это стартовая директория скрипта
