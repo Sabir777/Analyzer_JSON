@@ -9,7 +9,7 @@
 # Назначение: Скрипт для сборки JSON.
 # Автор: Hypnodancer
 # Дата создания: 03-01-2026
-# Версия: 2.1
+# Версия: 2.2
 #====================================================================================
 
 #------------------------------------------------------------------------------------
@@ -66,12 +66,57 @@ def is_diff(number):
     return False
 
 
+def json_object_export(name):
+    """Функция для экспорта json-файла в python-объект"""
+
+    if name.is_file():  # Если файл существует возвращаю python-объект
+        try:
+            with open(name) as file:
+                # Получаю JSON в формате python
+                obj_python = json.load(file)
+                return obj_python
+        except Exception as err:
+            sys.exit(f"Не удалось преобразовать {name} в python-объект")
+    else:
+        return None
+
 
 def make_json(number, old_pwd):
     """Получаю новый python-объект после внесенных в проект изменений.
     После поиска изменений и возвращения результата он будет преобразован
     в JSON-объект и сохранен в новой папке"""
 
+    # Текущая директория
+    pwd = Path.cwd()
+
+    # Получаю имена объектов
+    file = pwd / f'{number}.json'
+    other = pwd / ("2.json" if number == '1' else "1.json")
+
+    # Получаю json-объекты
+    file_json = json_object_export(file)
+    other_json = json_object_export(other)
+
+    # Проверяю изменения: если их нет, то ищу рекурсивно
+    change = is_diff(number)
+    if change and file_json is not None: # Изменения есть и объект существует
+        return file_json 
+    elif change and file_json is None: # Изменения есть, но объект был удален
+        return None 
+    elif not change: # Изменений нет - нужно рыть
+        # создавать родительские контейнеры только если где будет создан дочерний объект
+        # Изменить на нормальный код!!!!
+        # Перебор все папок до изменений: Метакод
+        for папка in dirs(pwd):
+            val = make_json(папка)
+            if val != None:
+                change = True
+                obj[key] = val
+        if change:
+            return obj
+        else:
+            return None
+        
 
 
 # def make_json(number, old_pwd):
