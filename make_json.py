@@ -167,10 +167,10 @@ if __name__ == '__main__':
     os.chdir('..')
 
     # Создаю имя для папки в которой будет сохранен новый json
-    pattern = r"(diff)(_[_\w-]+_)(\d{12})"
+    pattern = r"^diff_([_\w-]+?)_\d{12}"
     # Уникальность по дате-времени создания
     timestamp = datetime.now().strftime("%Y%m%d%H%M")
-    make_dir = Path.cwd() / sub(pattern, fr'make\2{timestamp}',dir_project)
+    make_dir = Path.cwd() / sub(pattern, fr'make_\1_{timestamp}',dir_project)
     os.makedirs(make_dir, exist_ok=True) # Создаю папку
 
     # Записываю результат в файл
