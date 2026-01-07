@@ -103,22 +103,46 @@ def make_json(number, old_pwd):
     if change and file_json is not None: # Изменения есть и объект существует
         return file_json 
     elif change and file_json is None: # Изменения есть, но объект был удален
-        return None 
+        return '__json_file_remove__' 
     elif not change: # Если изменений нет в текущей папке, ищу их в дочерних папках
-
-        if file_json is None: # Создаю пустой список либо пустой словарь
+        if file_json is None: # Если json-файла не существует
             file_json = [] if type(other_json) == list else {}
 
-        for item in pwd.iterdir():
-            if item.is_dir(): # Если объект является папкой
-                os.chdir(item) # Перехожу в дочернюю папку
-                value = make_json(number, pwd)
-                if value is not None:
-                    change = True
-                    if type(file_json) == list:
-                        file_json.append(value)
-                    else:
-                        file_json[item.name] = value
+            for item in pwd.iterdir():
+                if item.is_dir(): # Если объект является папкой
+                    os.chdir(item) # Перехожу в дочернюю папку
+                    value = make_json(number, pwd)
+                    if value is not None:
+                        change = True
+                        if type(file_json) == list:
+                            if value != '__json_file_remove__':
+                                file_json.append(value)
+                        else:
+                            if value != '__json_file_remove__':
+                                file_json[item.name] = value
+
+        else: # json-файл существует
+            for item in pwd.iterdir():
+                if item.is_dir(): # Если объект является папкой
+                    os.chdir(item) # Перехожу в дочернюю папку
+                    value = make_json(number, pwd)
+                    if value is not None:
+                        change = True
+                        if type(file_json) == list:
+                            if value != '__json_file_remove__':
+                                file_json.append(value)
+                            else:
+                                index = int(item.name.removeprefix('__'))
+                                if index < len(file_json):
+                                    del file_json[index]
+                        else:
+                            if value != '__json_file_remove__':
+                                file_json[item.name] = value
+                            else:
+                                # Если json-файла нет в дочерней папке удаляю ключ-значение из словаря
+                                key = item.name
+                                if key in file_json:
+                                    del file_json[key]
 
         # После обработки вложенных объектов возвращаюсь в родительскую директорию (Произвольная вложенность)
         # Ничего не делаю, если это стартовая директория скрипта
