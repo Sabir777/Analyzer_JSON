@@ -9,7 +9,7 @@
 # Назначение: Скрипт для сборки JSON.
 # Автор: Hypnodancer
 # Дата создания: 07-01-2026
-# Версия: 2.5
+# Версия: 2.6
 #====================================================================================
 
 #------------------------------------------------------------------------------------
@@ -101,15 +101,21 @@ def make_json(number, old_pwd):
     # Проверяю изменения: если их нет, то ищу рекурсивно
     change = is_diff(number)
     if change and file_json is not None: # Изменения есть и объект существует
+        if old_pwd != pwd:
+            os.chdir('..')
         return file_json 
     elif change and file_json is None: # Изменения есть, но объект был удален
+        if old_pwd != pwd:
+            os.chdir('..')
         return '__json_file_remove__' 
     elif not change: # Если изменений нет в текущей папке, ищу их в дочерних папках
+
         if file_json is None: # Если json-файла не существует
+            # Создаю пустой объект
             file_json = [] if type(other_json) == list else {}
 
             for item in pwd.iterdir():
-                if item.is_dir(): # Если объект является папкой
+                if item.is_dir(): # Если item является папкой
                     os.chdir(item) # Перехожу в дочернюю папку
                     value = make_json(number, pwd)
                     if value is not None:
@@ -117,13 +123,13 @@ def make_json(number, old_pwd):
                         if type(file_json) == list:
                             if value != '__json_file_remove__':
                                 file_json.append(value)
-                        else:
+                        else: # file_json является словарем
                             if value != '__json_file_remove__':
                                 file_json[item.name] = value
 
         else: # json-файл существует
             for item in pwd.iterdir():
-                if item.is_dir(): # Если объект является папкой
+                if item.is_dir(): # Если item является папкой
                     os.chdir(item) # Перехожу в дочернюю папку
                     value = make_json(number, pwd)
                     if value is not None:
@@ -135,11 +141,10 @@ def make_json(number, old_pwd):
                                 index = int(item.name.removeprefix('__'))
                                 if index < len(file_json):
                                     del file_json[index]
-                        else:
+                        else: # file_json является словарем
                             if value != '__json_file_remove__':
                                 file_json[item.name] = value
-                            else:
-                                # Если json-файла нет в дочерней папке удаляю ключ-значение из словаря
+                            else: # Если json-файла нет в дочерней папке удаляю ключ-значение из словаря
                                 key = item.name
                                 if key in file_json:
                                     del file_json[key]
