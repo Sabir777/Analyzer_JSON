@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
 
-#====================================================================================
+# ====================================================================================
 #                                Проект: Analizer_JSON
-#====================================================================================
+# ====================================================================================
 #                                  1)  diff_json.py
-#====================================================================================
+# ====================================================================================
 # Назначение: Скрипт для детального сравнения двух JSON-файлов и редактирования JSON.
 # Автор: Hypnodancer
 # Дата создания: 03-01-2026
 # Версия: 2.2
-#====================================================================================
+# ====================================================================================
 
-#------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 #                                     Аннотация
-#------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 #
 #                          Проект состоит из двух частей:
 #
@@ -29,9 +29,9 @@
 #
 #    make_json.py <1 или 2> <папка с проектом>
 #
-#------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 #                                    Редактирование
-#------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 #
 #                                  Работа с проектом:
 #
@@ -53,17 +53,15 @@
 #   поймет что здесь был удален объект. Функция вернет None самой себе. Тогда уровнем
 #   выше функция поймет что нужно удалить данное значение и удалит его из корневого JSON
 #
-#------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 
 
-
-import sys
 import json
 import os
-from pathlib import Path
-from datetime import datetime
 import subprocess
-
+import sys
+from datetime import datetime
+from pathlib import Path
 
 
 class DiffError(Exception):
@@ -81,41 +79,44 @@ def print_json(json_object, name_json, old_pwd):
     # Создаю файл JSON в текущей директории для данного объекта
     # Создаю теневые копии для всех создаваемых объектов
     # Теневая копия позволит понять был ли изначально здесь объект JSON (при удалении значений)
-    with open(f'{name_json}.json', 'w') as file1, open(f'.{name_json}.json', 'w') as file2:
+    with (
+        open(f"{name_json}.json", "w") as file1,
+        open(f".{name_json}.json", "w") as file2,
+    ):
         json.dump(json_object, file1, indent=2)
         json.dump(json_object, file2, indent=2)
 
     # Каждый объект JSON - это итерируемый объект
     # Если его элемент - это вложенный объект, то он обрабатывается рекурсивно
-    if type(json_object) == list:
+    if isinstance(json_object, list):
         for index, val in enumerate(json_object):
             if type(val) in (list, dict):
-                new_dir = pwd / f'__{index}'
-                os.makedirs(new_dir, exist_ok=True) # Создаю номерную папку для списка
-                os.chdir(new_dir) # Перехожу в новую папку
+                new_dir = pwd / f"__{index}"
+                os.makedirs(new_dir, exist_ok=True)  # Создаю номерную папку для списка
+                os.chdir(new_dir)  # Перехожу в новую папку
                 print_json(val, name_json, pwd)
 
-    else: # если json_object это dict, то каждый элемент сохраняю в папке с именем ключа
+    else:  # если json_object это dict, то каждый элемент сохраняю в папке с именем ключа
         for key, val in json_object.items():
             if type(val) in (list, dict):
-                new_dir = pwd / f'{key}'
-                os.makedirs(new_dir, exist_ok=True) # Создаю папку с именем ключа
-                os.chdir(new_dir) # Перехожу в новую папку
+                new_dir = pwd / f"{key}"
+                os.makedirs(new_dir, exist_ok=True)  # Создаю папку с именем ключа
+                os.chdir(new_dir)  # Перехожу в новую папку
                 print_json(val, name_json, pwd)
-
 
     # После обработки вложенных объектов возвращаюсь в родительскую директорию (Произвольная вложенность)
     # Ничего не делаю, если это стартовая директория скрипта
     if old_pwd != pwd:
-        os.chdir('..')
+        os.chdir("..")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Получаю аргументы скрипта
     args = sys.argv[1:]
     if len(args) != 2:
-        sys.exit("В команду нужно передать два аргумента!!!\nАварийное завершение программы")
+        sys.exit(
+            "В команду нужно передать два аргумента!!!\nАварийное завершение программы"
+        )
     first_name, second_name = args
 
     try:
@@ -127,41 +128,40 @@ if __name__ == '__main__':
     except Exception as err:
         sys.exit(f"Неверные типы переданных файлов:\n{err}")
 
-
-    
     # Удаляю суффикс .json из имени
     first_name = first_name.removesuffix(".json")
     second_name = second_name.removesuffix(".json")
     # Создаю папку с проектом (уникальность по именам и дате-времени создания)
     timestamp = datetime.now().strftime("%Y%m%d%H%M")
-    new_dir = f'diff_{first_name}__{second_name}_{timestamp}'
-    os.makedirs(new_dir, exist_ok=True) # Создаю папку
-    os.chdir(new_dir) # Перехожу в новую папку
-    pwd = Path.cwd() # Текущая директория скрипта
+    new_dir = f"diff_{first_name}__{second_name}_{timestamp}"
+    os.makedirs(new_dir, exist_ok=True)  # Создаю папку
+    os.chdir(new_dir)  # Перехожу в новую папку
+    pwd = Path.cwd()  # Текущая директория скрипта
 
     # Передаю в функцию объект JSON, номер JSON и текущую директорию
     print_json(one, 1, pwd)
     print_json(two, 2, pwd)
 
-
     # Сравниваю diff -u 1.json 2.json во всех папках включая вложенные
     for dirpath, _, files in os.walk(pwd):
         current_dir = Path(dirpath)
-        
+
         # Проверяю наличие 1.json и 2.json
-        if '1.json' in files or '2.json' in files:
+        if "1.json" in files or "2.json" in files:
             # Если одного из файлов не существует, то сравнивать с пустым файлом
-            f_file = lambda name: str(current_dir / name) if name in files else '/dev/null'
-            file1 = f_file('1.json')
-            file2 = f_file('2.json')
-            diff_file = current_dir / 'diff.txt'
-            
+            def f_file(name):
+                str(current_dir / name) if name in files else "/dev/null"
+
+            file1 = f_file("1.json")
+            file2 = f_file("2.json")
+            diff_file = current_dir / "diff.txt"
+
             try:
                 result = subprocess.run(
-                    ['diff', '-u', file1, file2],
+                    ["diff", "-u", file1, file2],
                     capture_output=True,
                     text=True,
-                    check=False  # Не выбрасывать исключение при различии файлов
+                    check=False,  # Не выбрасывать исключение при различии файлов
                 )
 
                 # returncode: 0=идентичны, 1=различаются, 2=ошибка
@@ -171,7 +171,6 @@ if __name__ == '__main__':
                 # Сохраняю различия в файл diff.txt если файлы различаются
                 if res == 1:
                     diff_file.write_text(result.stdout)
-                
 
             except Exception as e:
                 print(f"  ✗ Ошибка: {e}")
